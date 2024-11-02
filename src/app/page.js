@@ -1,25 +1,23 @@
-// src/app/page.js
-
 "use client"
 
-import ProductCard from '@/components/ui/ProductCard'
-import SortAndFilter from '@/components/ui/sortBy'
+import ProductCard from '@/components/ProductCard'
+import SortAndFilter from '@/components/sortBy'
 import { fetchProducts } from '@/lib/fetchProducts'
-import { handleSort } from '@/utils/sorting'
+import { applyFilters, handleAddToCart } from '@/lib/handlers' // Import your new handlers
 import { useEffect, useState } from 'react'
+import loading from './loading'
 
 export default function Home() {
   const [products, setProducts] = useState([])
   const [error, setError] = useState(null)
-  const [filteredProducts, setFilteredProducts] = useState([])
-  const [filteredCategory, setFilteredCategory] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedSortOption, setSelectedSortOption] = useState('')
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const products = await fetchProducts()
         setProducts(products)
-        setFilteredProducts(products) // Set initial products for display
       } catch (err) {
         setError(err.message)
       }
@@ -27,49 +25,36 @@ export default function Home() {
     loadProducts()
   }, [])
 
-  const onSortChange = (sortOption) => {
-    const sortedProducts = handleSort(filteredProducts, sortOption)
-    setFilteredProducts(sortedProducts)
+  // Get displayed products based on current filters and sorting
+  const displayedProducts = applyFilters(products, selectedCategory, selectedSortOption)
+
+  // Handle sort change
+  const handleSortChange = (sortOption) => {
+    setSelectedSortOption(sortOption)
   }
 
-  const onCategoryChange = (category) => {
-    setFilteredCategory(category)
-
-    // Filter products based on selected category
-    if (category) {
-      const categoryFilteredProducts = products.filter(
-        (product) => product.category === category
-      )
-      setFilteredProducts(categoryFilteredProducts)
-    } else {
-      setFilteredProducts(products) // Show all products if no category is selected
-    }
-  }
-
-  const handleAddToCart = (productId) => {
-    console.log("Added product to cart:", productId)
+  // Handle category change
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category)
   }
 
   if (error) {
     return <p>Error fetching products: {error}</p>
   }
 
-  if (products.length === 0) {
-    return <p>No products available.</p>
+  if (displayedProducts.length === 0) {
+    return loading()
   }
 
   return (
     <main className="p-4">
-      <SortAndFilter
-        onSortChange={onSortChange}
-        onCategoryChange={onCategoryChange}
-      /> {/* Pass onSortChange and onCategoryChange to SortAndFilter */}
+      <SortAndFilter onSortChange={handleSortChange} onCategoryChange={handleCategoryChange} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-        {filteredProducts.map((product) => (
+        {displayedProducts.map((product) => (
           <ProductCard
             key={product.id}
             product={product}
-            onAddToCart={handleAddToCart}
+            onAddToCart={() => handleAddToCart(product.id)} // Use the imported handleAddToCart function
           />
         ))}
       </div>

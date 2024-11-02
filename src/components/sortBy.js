@@ -2,8 +2,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu' // Adjust path based on your project structure
 import { useState } from 'react'
 
@@ -44,11 +43,10 @@ const SortAndFilter = ({ onSortChange, onCategoryChange }) => {
     <div className="flex space-x-4 pb-2">
       {/* Category Dropdown */}
       <DropdownMenu>
-        <DropdownMenuTrigger className="px-4 py-2 border rounded-md shadow-sm bg-white text-gray-700 focus:outline-none">
-          {selectedCategory}
+        <DropdownMenuTrigger className="dropdown-trigger px-4 py-2 border rounded-md shadow-sm bg-white text-gray-700 transition-all duration-150 ease-in-out">
+          {selectedCategory} {/* Category button */}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>Category</DropdownMenuLabel>
           {categories.map((category) => (
             <DropdownMenuItem key={category} onClick={() => handleCategorySelect(category)}>
               {category}
@@ -59,11 +57,10 @@ const SortAndFilter = ({ onSortChange, onCategoryChange }) => {
 
       {/* Sort By Dropdown */}
       <DropdownMenu>
-        <DropdownMenuTrigger className="px-4 py-2 border rounded-md shadow-sm bg-white text-gray-700 focus:outline-none">
+        <DropdownMenuTrigger className="dropdown-trigger px-4 py-2 border rounded-md shadow-sm bg-white text-gray-700 transition-all duration-150 ease-in-out">
           {selectedSortOption}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>Sort By</DropdownMenuLabel>
           {sortOptions.map((option) => (
             <DropdownMenuItem key={option.value} onClick={() => handleSortSelect(option.value)}>
               {option.label}

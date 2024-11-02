@@ -84,3 +84,14 @@ h1 {
 h2 {
   @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0
 }
+
+.dropdown-trigger {
+  transition: all 0.3s ease;
+}
+
+.dropdown-trigger[aria-expanded="true"] {
+  background-color: #ebf4ff; /* Light indigo */
+  color: #4c51bf; /* Indigo text color */
+  border-color: #4c51bf; /* Indigo border */
+  box-shadow: 0 4px 8px rgba(76, 81, 191, 0.2); /* Light shadow effect */
+}
