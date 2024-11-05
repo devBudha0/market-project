@@ -1,5 +1,5 @@
+import Logo from '@/components/Logo'
 import localFont from "next/font/local"
-import Link from 'next/link'
 import "./globals.css"
 
 const geistSans = localFont({
@@ -18,17 +18,17 @@ export const metadata = {
   description: "Sell anything, anytime!",
 };
 
-export default function RootLayout({ children }) {
+export default function Layout({ children }) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Link href="/">
-          <h1>Market</h1>
-        </Link>
-        {children}
+        <header>
+          <Logo /> {/* Market logo with a clickable link to the main page */}
+        </header>
+        <main>{children}</main>
       </body>
     </html>
-  );
+  )
 }
