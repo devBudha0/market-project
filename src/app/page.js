@@ -38,7 +38,7 @@ export default function Home() {
 
   // Apply filters whenever products, search query, sort option, or category changes
   useEffect(() => {
-    // Step 1: Filter by search query (product name)
+    // Filter by search query (product name)
     let updatedProducts = products
     if (searchQuery) {
       updatedProducts = updatedProducts.filter(product =>
@@ -46,12 +46,12 @@ export default function Home() {
       )
     }
 
-    // Step 2: Filter by category
+    // Filter by category
     if (category !== 'All') {
       updatedProducts = updatedProducts.filter(product => product.category === category)
     }
 
-    // Step 3: Apply sorting
+    // Apply sorting
     const sortedAndFilteredProducts = applySort(updatedProducts, sortOption)
     setFilteredProducts(sortedAndFilteredProducts)
   }, [products, searchQuery, sortOption, category, applySort])
@@ -68,13 +68,9 @@ export default function Home() {
 
   if (loading) {
     return loadingSkeleton()
-  }
-
-  if (error) {
+  } else if (error) {
     return <p>Error fetching products: {error}</p>
-  }
-
-  if (products.length === 0) {
+  } else if (products.length === 0) {
     return <p>No products available.</p>
   }
 
