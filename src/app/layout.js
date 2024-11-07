@@ -1,33 +1,26 @@
-import Logo from '@/components/Logo'
-import localFont from "next/font/local"
-import "./globals.css"
+"use client"
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
-export const metadata = {
-  title: "Budha's e-shop",
-  description: "Sell anything, anytime!",
-};
+// Layout.js
+import TopBar from '@/components/TopBar'
+import { CartProvider } from '@/context/CartContext'
+import { ProductsProvider } from '@/context/ProductsContext'
+import './globals.css'
 
 export default function Layout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <header>
-          <Logo /> {/* Market logo with a clickable link to the main page */}
-        </header>
-        <main>{children}</main>
+      <head>
+        <title>E-shop</title>
+      </head>
+      <body>
+        <ProductsProvider>
+          <CartProvider>
+            <header>
+              <TopBar /> {/* Display the top bar */}
+            </header>
+            <main>{children}</main>
+          </CartProvider>
+        </ProductsProvider>
       </body>
     </html>
   )

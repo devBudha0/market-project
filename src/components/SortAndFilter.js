@@ -13,40 +13,20 @@ const SortAndFilter = ({ products, onSortChange, onCategoryChange }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const categoryFromQuery = searchParams.get('category') || 'All'
-  const sortFromQuery = searchParams.get('sort') || 'Sort by'
 
-  const [selectedCategory, setSelectedCategory] = useState(categoryFromQuery)
-  const [selectedSortOption, setSelectedSortOption] = useState(sortFromQuery)
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [selectedSortOption, setSelectedSortOption] = useState('Sort by')
 
   useEffect(() => {
     // Reset the category and sort state if no query parameters are present
-    if (!searchParams.has('category')) setSelectedCategory('All')
-    if (!searchParams.has('sort')) setSelectedSortOption('Sort by')
-  }, [searchParams])
+    if (searchParams.has('sort')) handleSortSelect(searchParams.get('sort'))
 
-  const categories = [
-    'All', // Default category option
-    'Electronics',
-    'Appliances',
-    'Furniture',
-    'Clothing',
-    'Accessories',
-    'Stationery',
-    'Decor',
-    'Books',
-  ]
-
-  const sortOptions = [
-    { label: 'A to Z', value: 'aToZ' },
-    { label: 'Z to A', value: 'zToA' },
-    { label: 'Price: Low to High', value: 'priceLowToHigh' },
-    { label: 'Price: High to Low', value: 'priceHighToLow' },
-  ]
+    if (searchParams.has('category')) handleCategorySelect(searchParams.get('category'))
+  }, [])
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category)
-    onCategoryChange(category === 'All' ? '' : category)
+    onCategoryChange(category)
 
     const newParams = new URLSearchParams(searchParams.toString())
     if (category === 'All') {
@@ -54,36 +34,34 @@ const SortAndFilter = ({ products, onSortChange, onCategoryChange }) => {
     } else {
       newParams.set('category', category)
     }
-    router.push(`/?${newParams.toString()}`)
+    router.replace(`/?${newParams.toString()}`)
   }
 
   const handleSortSelect = (sortOption) => {
     setSelectedSortOption(sortOptions.find((opt) => opt.value === sortOption)?.label || 'Sort by')
-
-    const sortedProducts = [...products]
-    switch (sortOption) {
-      case 'aToZ':
-        sortedProducts.sort((a, b) => a.name.localeCompare(b.name))
-        break
-      case 'zToA':
-        sortedProducts.sort((a, b) => b.name.localeCompare(a.name))
-        break
-      case 'priceLowToHigh':
-        sortedProducts.sort((a, b) => a.price - b.price)
-        break
-      case 'priceHighToLow':
-        sortedProducts.sort((a, b) => b.price - a.price)
-        break
-      default:
-        break
-    }
-
-    onSortChange(sortedProducts)
+    onSortChange(sortOption)
 
     const newParams = new URLSearchParams(searchParams.toString())
-    newParams.set('sort', sortOption)
-    router.push(`/?${newParams.toString()}`)
+    if (sortOption === 'Sort by') {
+      newParams.delete('sort')
+    } else {
+      newParams.set('sort', sortOption)
+    }
+    router.replace(`/?${newParams.toString()}`)
   }
+
+  window.resetState = () => {
+    // Reset internal state
+    setSelectedCategory('All')
+    setSelectedSortOption('Sort by')
+
+    // Call the category and sort handlers to reset product state in parent
+    onCategoryChange('All')
+    onSortChange('aToZ') // Set to the default sort option (or whichever initial sort you prefer)
+
+      // Remove all query parameters from the URL
+      router.replace('/')
+    }
 
   return (
     <div className="flex space-x-4 pb-2">
@@ -117,5 +95,24 @@ const SortAndFilter = ({ products, onSortChange, onCategoryChange }) => {
     </div>
   )
 }
+
+const categories = [
+  'All', // Default category option
+  'Electronics',
+  'Appliances',
+  'Furniture',
+  'Clothing',
+  'Accessories',
+  'Stationery',
+  'Decor',
+  'Books',
+]
+
+const sortOptions = [
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Price: Low to High', value: 'priceLowToHigh' },
+  { label: 'Price: High to Low', value: 'priceHighToLow' },
+]
 
 export default SortAndFilter

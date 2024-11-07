@@ -11,6 +11,9 @@ export default function Logo({ onClick }) {
     e.preventDefault() // Prevents default link behavior to control navigation
     router.push('/') // Navigate to the main page
 
+    if (window.resetState) {
+      window.resetState() // Reset everything when navigating to the home page
+    }
   }
 
   return (

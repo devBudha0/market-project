@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { FaShoppingCart } from 'react-icons/fa'
 
 export default function ProductCard({ product, onAddToCart }) {
   return (<>
@@ -26,6 +27,8 @@ export default function ProductCard({ product, onAddToCart }) {
             onAddToCart(product.id) // Call the onAddToCart function
           }}
         >
+          <FaShoppingCart className="text-white text-2xl " />
+
           Add to cart
         </Button>
       </CardFooter>

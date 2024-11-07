@@ -1,80 +1,65 @@
+// src/app/page.js
+
 "use client"
 
 import ProductCard from '@/components/ProductCard'
 import SortAndFilter from '@/components/SortAndFilter'
-import { fetchProducts } from '@/lib/fetchProducts'
-import { useEffect, useState } from 'react'
+import { useProducts } from '@/context/ProductsContext'
+import { useCallback, useEffect, useState } from 'react'
+import loadingSkeleton from './loadingSkeleton'
 
 export default function Home() {
-  const [products, setProducts] = useState([]) // Original products from the backend
+  const { products, error, loading } = useProducts()  // Destructure values from context
   const [filteredProducts, setFilteredProducts] = useState([]) // Filtered/sorted products for display
-  const [error, setError] = useState(null)
+  const [sortOption, setSortOption] = useState('') // Store current sort option
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const fetchedProducts = await fetchProducts()
-        setProducts(fetchedProducts)
-        setFilteredProducts(fetchedProducts) // Initialize with all products
-      } catch (err) {
-        setError(err.message)
-      }
+    if (products.length > 0) {
+      setFilteredProducts(products)  // Initialize filtered products when products are available
     }
-    loadProducts()
-  }, [])
+  }, [products])  // Depend on products to update filtered products
 
-  // UseEffect for handling URL parameter changes
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const category = params.get('category') || 'All'
-    const sort = params.get('sort') || 'Sort by'
-
-    // Create a new array to avoid modifying the original products directly
-    let updatedProducts = [...products]
-
-    // Filter products based on the selected category
-    if (category && category !== 'All') {
-      updatedProducts = updatedProducts.filter(product => product.category === category)
-    }
-
-    // Sort products according to the selected sort option
-    switch (sort) {
-      case 'priceLowToHigh':
-        updatedProducts.sort((a, b) => a.price - b.price)
-        break
-      case 'priceHighToLow':
-        updatedProducts.sort((a, b) => b.price - a.price)
-        break
+  const applySort = useCallback((productsToSort, option) => {
+    const sortedProducts = [...productsToSort]
+    switch (option) {
       case 'aToZ':
-        updatedProducts.sort((a, b) => a.name.localeCompare(b.name))
+        sortedProducts.sort((a, b) => a.name.localeCompare(b.name))
         break
       case 'zToA':
-        updatedProducts.sort((a, b) => b.name.localeCompare(a.name))
+        sortedProducts.sort((a, b) => b.name.localeCompare(a.name))
+        break
+      case 'priceLowToHigh':
+        sortedProducts.sort((a, b) => a.price - b.price)
+        break
+      case 'priceHighToLow':
+        sortedProducts.sort((a, b) => b.price - a.price)
         break
       default:
         break
     }
+    return sortedProducts
+  }, [])
 
-    // Update the filtered products
-    setFilteredProducts(updatedProducts)
-  }, [products, window.location.search]) // Runs when products or URL parameters change
-
-  const handleCategoryChange = (category) => {
-    // Update the filtered products based on the selected category immediately
+  const handleCategoryChange = useCallback((category) => {
+    let updatedProducts
     if (category === 'All') {
-      setFilteredProducts(products)
+      updatedProducts = products
     } else {
-      const updatedProducts = products.filter((product) => product.category === category)
-      setFilteredProducts(updatedProducts)
+      updatedProducts = products.filter((product) => product.category === category)
     }
-  }
 
-  const handleSortChange = (sortedProducts) => {
-    setFilteredProducts(sortedProducts)
-  }
+    // Apply the current sort option to the filtered products
+    const sortedAndFilteredProducts = applySort(updatedProducts, sortOption)
+    setFilteredProducts(sortedAndFilteredProducts)
+  }, [products, sortOption, applySort])
 
-  const handleLogoClick = () => {
-    setFilteredProducts(products)
+  const handleSortChange = useCallback((option) => {
+    setSortOption(option) // Update the current sort option
+    setFilteredProducts(prevProducts => applySort(prevProducts, option))
+  }, [applySort])
+
+  if (loading) {
+    return loadingSkeleton()
   }
 
   if (error) {
