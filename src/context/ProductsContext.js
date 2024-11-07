@@ -15,6 +15,7 @@ export const ProductsProvider = ({ children }) => {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)  // Track loading state
   const [error, setError] = useState(null)      // Track error state
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -32,7 +33,7 @@ export const ProductsProvider = ({ children }) => {
   }, [])
 
   return (
-    <ProductsContext.Provider value={{ products, loading, error }}>
+    <ProductsContext.Provider value={{ products, loading, error, searchQuery, setSearchQuery }}>
       {children}
     </ProductsContext.Provider>
   )

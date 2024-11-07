@@ -9,16 +9,12 @@ import { useCallback, useEffect, useState } from 'react'
 import loadingSkeleton from './loadingSkeleton'
 
 export default function Home() {
-  const { products, error, loading } = useProducts()  // Destructure values from context
+  const { products, error, loading, searchQuery } = useProducts()  // Destructure values from context
   const [filteredProducts, setFilteredProducts] = useState([]) // Filtered/sorted products for display
   const [sortOption, setSortOption] = useState('') // Store current sort option
+  const [category, setCategory] = useState('All') // Store current category
 
-  useEffect(() => {
-    if (products.length > 0) {
-      setFilteredProducts(products)  // Initialize filtered products when products are available
-    }
-  }, [products])  // Depend on products to update filtered products
-
+  // Sorting function
   const applySort = useCallback((productsToSort, option) => {
     const sortedProducts = [...productsToSort]
     switch (option) {
@@ -40,23 +36,35 @@ export default function Home() {
     return sortedProducts
   }, [])
 
-  const handleCategoryChange = useCallback((category) => {
-    let updatedProducts
-    if (category === 'All') {
-      updatedProducts = products
-    } else {
-      updatedProducts = products.filter((product) => product.category === category)
+  // Apply filters whenever products, search query, sort option, or category changes
+  useEffect(() => {
+    // Step 1: Filter by search query (product name)
+    let updatedProducts = products
+    if (searchQuery) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     }
 
-    // Apply the current sort option to the filtered products
+    // Step 2: Filter by category
+    if (category !== 'All') {
+      updatedProducts = updatedProducts.filter(product => product.category === category)
+    }
+
+    // Step 3: Apply sorting
     const sortedAndFilteredProducts = applySort(updatedProducts, sortOption)
     setFilteredProducts(sortedAndFilteredProducts)
-  }, [products, sortOption, applySort])
+  }, [products, searchQuery, sortOption, category, applySort])
 
+  // Category change handler
+  const handleCategoryChange = useCallback((newCategory) => {
+    setCategory(newCategory) // Update the current category
+  }, [])
+
+  // Sort change handler
   const handleSortChange = useCallback((option) => {
     setSortOption(option) // Update the current sort option
-    setFilteredProducts(prevProducts => applySort(prevProducts, option))
-  }, [applySort])
+  }, [])
 
   if (loading) {
     return loadingSkeleton()
