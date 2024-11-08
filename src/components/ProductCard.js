@@ -5,13 +5,10 @@ import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import { useCart } from '@/context/CartContext'
 import Link from 'next/link'
 import { FaShoppingCart } from 'react-icons/fa'
+import { toast } from 'sonner'
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart()
-
-  const handleAddToCart = () => {
-    addToCart(product)
-  }
 
   return (<>
     <Card className="flex flex-col justify-between min-h-[300px]">
@@ -28,10 +25,11 @@ export default function ProductCard({ product }) {
       <CardFooter className="flex justify-between">
         <Button
           href="#"
-          className="w-full"
+          className="w-full hover:bg-indigo-900"
           onClick={(e) => {
             e.stopPropagation() // Prevents redirect to the details page
-            handleAddToCart() // Call the addToCart function
+            addToCart(product) // Call the addToCart function
+            toast('Item has been added to cart')
           }}
         >
           <FaShoppingCart className="text-white text-2xl " />

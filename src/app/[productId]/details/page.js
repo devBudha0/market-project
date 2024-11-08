@@ -1,6 +1,8 @@
-// pages/product/[productId].jsx
+// src/app/product/[productId].jsx
+
 "use client"
 
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -9,37 +11,30 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { supabase } from '@/utils/supabase/client'
+import { useCart } from '@/context/CartContext'
+import { useProducts } from '@/context/ProductsContext'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { FaShoppingCart } from 'react-icons/fa'
+import { toast } from 'sonner'
 
 export default function ProductDetails() {
   const { productId } = useParams()
+  const { products, error, loading } = useProducts()
+  const { addToCart } = useCart()
   const [product, setProduct] = useState(null)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .single()
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setProduct(data)
-      }
+    // Ensure product data is loaded before attempting to find the product
+    if (products.length > 0) {
+      const selectedProduct = products.find((p) => p.id.toString() === productId)
+      setProduct(selectedProduct || null)
     }
+  }, [products, productId])
 
-    if (productId) {
-      fetchProductDetails()
-    }
-  }, [productId])
-
-  if (error) return <p>Error loading product details: {error}</p>
-  if (!product) return <p>Loading...</p>
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error loading products: {error}</p>
+  if (!product) return <p>Product not found.</p>
 
   return (
     <main className="p-8">
@@ -49,7 +44,7 @@ export default function ProductDetails() {
           <p className="text-gray-500">Product Image</p>
         </div>
 
-        {/* Product Information in Card Component */}
+        {/* Product Information */}
         <Card className="flex flex-col w-full md:w-1/2">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">{product.name}</CardTitle>
@@ -63,27 +58,43 @@ export default function ProductDetails() {
             <p className="text-gray-500">Owner Account: {product.owner || "Unknown"}</p>
           </CardContent>
 
-          <CardFooter className="flex flex-col mt-4">
-            <h2 className="text-lg font-medium">Write a Review</h2>
-            <div className="flex gap-1 mt-2">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>⭐</span>
-              ))}
-            </div>
-            <textarea
-              placeholder="Write your review here"
-              className="mt-2 w-full border rounded p-2 text-gray-700"
-              rows="3"
-            ></textarea>
+          <CardFooter className="flex justify-center mt-4">
+            <Button
+              href="#"
+              className="w-full hover:bg-indigo-900"
+              onClick={(e) => {
+                e.stopPropagation() // Prevents redirect to the details page
+                addToCart(product) // Call the addToCart function
+                toast('Item has been added to cart')
+              }}
+            >
+              <FaShoppingCart className="text-white text-2xl " />
+
+              Add to cart
+            </Button>
           </CardFooter>
         </Card>
       </section>
 
+      {/* Write a Review Section
+      <section className="mt-8">
+        <h2 className="text-lg font-medium">Write a Review</h2>
+        <div className="flex gap-1 mt-2">
+          {[...Array(5)].map((_, i) => (
+            <span key={i}>⭐</span>
+          ))}
+        </div>
+        <textarea
+          placeholder="Write your review here"
+          className="mt-2 w-full border rounded p-2 text-gray-700"
+          rows="3"
+        ></textarea>
+      </section> */}
+
       {/* Similar Products Section */}
       <section className="mt-16">
-        <h2 className="text-xl font-semibold mb-4">Similar Products in This Category</h2>
+        <h3 className="text-xl font-semibold mb-4">Similar Products in This Category</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/* Placeholder cards for similar products */}
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="flex flex-col items-center p-4">
               <div className="w-full h-32 bg-gray-200 mb-4 flex items-center justify-center">
