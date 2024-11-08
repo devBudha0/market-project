@@ -2,10 +2,17 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
+import { useCart } from '@/context/CartContext'
 import Link from 'next/link'
 import { FaShoppingCart } from 'react-icons/fa'
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ product }) {
+  const { addToCart } = useCart()
+
+  const handleAddToCart = () => {
+    addToCart(product)
+  }
+
   return (<>
     <Card className="flex flex-col justify-between min-h-[300px]">
       <Link href={`/${product.id}/details`} passHref>
@@ -24,7 +31,7 @@ export default function ProductCard({ product, onAddToCart }) {
           className="w-full"
           onClick={(e) => {
             e.stopPropagation() // Prevents redirect to the details page
-            onAddToCart(product.id) // Call the onAddToCart function
+            handleAddToCart() // Call the addToCart function
           }}
         >
           <FaShoppingCart className="text-white text-2xl " />

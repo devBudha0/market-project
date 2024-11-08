@@ -11,8 +11,8 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 
 const TopBar = () => {
-  const { cartItems } = useCart() // Get cart items from context
-  const cartItemsCount = cartItems.length // Count the number of items in the cart
+  const { cart } = useCart() // Get cart items from context
+  const cartItemsCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   const { searchQuery, setSearchQuery } = useProducts();
   const router = useRouter()
@@ -22,11 +22,9 @@ const TopBar = () => {
     setSearchQuery(e.target.value)
   }
 
-  // const handleSearchSubmit = (e) => {
-  //   e.preventDefault()
-  //   // Redirect to the page with search query
-  //   router.push(`/search?query=${searchQuery}`)
-  // }
+  const handleRedirectToCart = () => {
+    router.push('/cart') // Navigate to the /cart page
+  };
 
   return (
     <div className="flex justify-between items-center p-0.5 bg-gray-800 text-white">
@@ -54,7 +52,7 @@ const TopBar = () => {
       </div>
 
       {/* Cart Icon */}
-      <Button className=" bg-gray-800flex items-center rounded-md hover:bg-indigo-900">
+      <Button onClick={handleRedirectToCart} className=" bg-gray-800flex items-center rounded-md hover:bg-indigo-900">
         <span className="text-white">{cartItemsCount}</span> {/* Display number of items in cart */}
         <FaShoppingCart className="text-white text-2xl" />
       </Button>
