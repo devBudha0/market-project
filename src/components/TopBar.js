@@ -26,6 +26,10 @@ const TopBar = () => {
     router.push('/cart') // Navigate to the /cart page
   };
 
+  const handleRedirectToAuth = () => {
+    router.push('/auth') // Navigate to the /cart page
+  };
+
   return (
     <div className="flex justify-between items-center p-0.5 bg-gray-800 text-white">
       <Logo className="pl-0" /> {/* Market logo with a clickable link to the main page */}
@@ -46,7 +50,7 @@ const TopBar = () => {
 
       {/* Sign In/Sign Up Buttons */}
       <div className="space-x-4">
-        <Button className="bg-gray-800 text-white rounded-md hover:bg-indigo-900">
+        <Button onClick={handleRedirectToAuth} className="bg-gray-800 text-white rounded-md hover:bg-indigo-900">
           Sign In
         </Button>
       </div>
