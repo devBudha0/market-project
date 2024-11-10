@@ -1,19 +1,17 @@
 import { createContext, useContext, useState } from "react"
 
-// context
+// Context
 const AuthContext = createContext({})
 
-// hook pro používání kontextu
+// Custom hook for using the context
 export const useAuth = () => useContext(AuthContext)
 
-// provider komponenta
+// Provider component
 export const AuthProvider = ({ children }) => {
-
-  // stav, který bude uchovávat informaci o uživateli
   const [user, setUser] = useState(null)
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, setUser }}>
       {children}
     </AuthContext.Provider>
   )

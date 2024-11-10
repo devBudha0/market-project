@@ -1,19 +1,25 @@
 // src/app/auth/SignInPage.js
 "use client"
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAuth } from '@/context/AuthProvider'
+import { supabase } from "@/utils/supabase/client" // Import Supabase client
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { toast } from 'sonner'
 
 export default function SignInPage() {
+  const { setUser } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [fullName, setFullName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
+  const [msg, setMsg] = useState("")
   const router = useRouter()
 
   // Email validation
@@ -23,13 +29,35 @@ export default function SignInPage() {
   const validatePassword = (password) =>
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password)
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     const newErrors = {}
     if (!validateEmail(email)) newErrors.email = "Please enter a valid email"
     if (!password) newErrors.password = "Password is required"
     setErrors(newErrors)
+
     if (!Object.keys(newErrors).length) {
-      // Implement sign-in logic
+      // Attempt sign-in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (error) {
+        setErrors({ password: "Login failed. Please check your credentials and try again." })
+      } else {
+        console.log("Login successful:", data) // This should include a user session if successful
+
+        // Fetch the user from Supabase's session after login
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          console.error("Error fetching session:", sessionError)
+        } else {
+          const user = sessionData.session?.user
+          console.log("Authenticated user session:", sessionData.session?.user)
+
+          setUser(user)
+          toast(`Welcome ${user.user_metadata.fullName}!`)
+
+          router.push("/")
+        }
+      }
     }
   }
 
@@ -42,26 +70,22 @@ export default function SignInPage() {
     }
     if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match"
     setErrors(newErrors)
+
     if (!Object.keys(newErrors).length) {
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { fullName }, // Store additional user data if desired
+        },
+      })
 
-      // try {
-      //   const { data, error } = await supabase.auth.signUp({
-      //     email,
-      //     password,
-      //     options: {
-      //       data: {
-      //         firstName: 'Karel',
-      //         age: 23,
-      //       }
-      //     }
-      //   })
-
-      //   if (!error && data) {
-      //     setMsg("Registration Successful. Check your email to confirm your account")
-      //   }
-      // } catch (error) {
-      //   setErrorMsg("Error in Creating Account")
-      // }
+      if (error) {
+        setErrors({ email: "Sign up failed, please try again." })
+      } else {
+        setMsg("Registration Successful. Check your email to confirm your account")
+      }
     }
   }
 
@@ -114,17 +138,14 @@ export default function SignInPage() {
                   {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
                 </div>
 
-                <p
-                  className="text-blue-500 cursor-pointer"
-                  onClick={() => router.push('/auth/forgot-password')}
-                >
+                <p className="text-blue-500 cursor-pointer" onClick={() => router.push('/auth/forgot-password')}>
                   Forgotten password?
                 </p>
               </div>
 
-              <button className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+              <Button onClick={handleSignIn} className="mt-6 w-full text-white py-2 rounded-lg hover:bg-indigo-900">
                 Sign In
-              </button>
+              </Button>
             </TabsContent>
 
             {/* Sign Up Tab */}
@@ -182,15 +203,15 @@ export default function SignInPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="border p-2 w-full rounded"
                   />
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
-                  )}
+                  {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
                 </div>
               </div>
 
-              <button className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+              <button onClick={handleSignUp} className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
                 Create Account
               </button>
+
+              {msg && <p className="text-green-500 text-center mt-4">{msg}</p>}
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -66,6 +66,8 @@ export default function Home() {
     setSortOption(option) // Update the current sort option
   }, [])
 
+  // console.log(products)
+
   if (loading) {
     return loadingSkeleton()
   } else if (error) {
